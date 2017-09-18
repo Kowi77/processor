@@ -16,8 +16,8 @@ public class ProcessorTest {
 
     private static int nThread;
 
-    @BeforeClass
-    public static void setUp(){
+    @Before
+    public void setUp(){
         nThread = 100;
         processor = new Processor(nThread);
     }
