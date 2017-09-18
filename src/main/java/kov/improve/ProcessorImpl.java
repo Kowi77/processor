@@ -24,6 +24,18 @@ public class ProcessorImpl implements Runnable{
         return consumerCounter;
     }
 
+    public static void setSupplierCounter() {
+        supplierCounter.set(0);
+    }
+
+    public static void setFunctionCounter() {
+        functionCounter.set(0);
+    }
+
+    public static void setConsumerCounter() {
+        consumerCounter.set(0);
+    }
+
     public void run(){
         Double d = supplier.get();
         Long l = function.apply(d);
@@ -45,7 +57,7 @@ public class ProcessorImpl implements Runnable{
     Supplier<Double> supplier = new Supplier<Double>() {
         @Override
         public Double get() {
-            synchronized (Processor.class){
+            synchronized (ProcessorImpl.class){
                 try {
                     Thread.sleep(30);
                 } catch (InterruptedException e) {
@@ -58,7 +70,7 @@ public class ProcessorImpl implements Runnable{
     Consumer<Long> consumer = new Consumer<Long>() {
         @Override
         public void accept(Long lng) {
-            synchronized (Processor.class){
+            synchronized (ProcessorImpl.class){
                 try {
                     Thread.sleep(30);
                 } catch (InterruptedException e) {

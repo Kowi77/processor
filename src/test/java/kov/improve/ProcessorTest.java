@@ -2,10 +2,11 @@ package kov.improve;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.rules.Stopwatch;
+import org.junit.runner.Description;
+
+import java.util.concurrent.TimeUnit;
 
 
 public class ProcessorTest {
@@ -20,12 +21,23 @@ public class ProcessorTest {
     public void setUp(){
         nThread = 100;
         processor = new Processor(nThread);
+        ProcessorImpl.setConsumerCounter();
+        ProcessorImpl.setFunctionCounter();
+        ProcessorImpl.setSupplierCounter();
     }
+
+    @Rule
+    public Stopwatch stopwatch = new Stopwatch() {
+        @Override
+        protected void finished(long nanos, Description description) {
+            log.info("Average runtime for one process in {} {} ms", description.getDisplayName (), (int) (TimeUnit.NANOSECONDS.toMillis(nanos)/ProcessorImpl.getConsumerCounter().get()));
+        }
+    };
 
     @Test
     public void testStart() throws Exception {
         processor.start();
-        Thread.sleep(nThread * 120);
+        processor.shutdown();
         Assert.assertEquals(nThread, ProcessorImpl.getSupplierCounter().get());
         Assert.assertEquals(nThread, ProcessorImpl.getFunctionCounter().get());
         Assert.assertEquals(nThread, ProcessorImpl.getConsumerCounter().get());
@@ -50,10 +62,10 @@ public class ProcessorTest {
         myThread.start();
 
         processor.start();
-        Thread.sleep(nThread * 50);
+        processor.shutdown();
         Assert.assertEquals(ProcessorImpl.getSupplierCounter().get(), ProcessorImpl.getConsumerCounter().get());
         Assert.assertEquals(ProcessorImpl.getSupplierCounter().get(), ProcessorImpl.getFunctionCounter().get());
-        log.info("Process with {} threads before shutdown successfully finished", ProcessorImpl.getSupplierCounter().get());
+        log.info("Process with {} threads before shutdown, successfully finished", ProcessorImpl.getSupplierCounter().get());
         myThread.interrupt();
         Thread.sleep(1);
     }
